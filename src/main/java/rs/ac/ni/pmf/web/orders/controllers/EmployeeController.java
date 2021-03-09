@@ -4,9 +4,9 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.*;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 import rs.ac.ni.pmf.web.orders.exceptions.EmployeeNotFoundException;
@@ -44,12 +44,17 @@ public class EmployeeController
 	}
 
 	@PostMapping("/employees")
-	@ResponseStatus(code = HttpStatus.CREATED)
-	public EmployeeDTO addEmployee(@RequestBody final EmployeeDTO employee)
+//	@ResponseStatus(code = HttpStatus.CREATED)
+//	public EntityModel<EmployeeDTO> addEmployee(@RequestBody final EmployeeDTO employee)
+	public ResponseEntity<?> addEmployee(@RequestBody final EmployeeDTO employee)
 	{
 		final EmployeeEntity entity = EmployeeMapper.toEntity(employee);
 		final EmployeeEntity savedEntity = _employeeRepository.save(entity);
-		return EmployeeMapper.toDto(savedEntity);
+		final EntityModel<EmployeeDTO> body = EntityModelBuilder.buildEmployeeEntityModel(EmployeeMapper.toDto(savedEntity));
+
+		return ResponseEntity
+			.created(body.getRequiredLink(IanaLinkRelations.SELF).toUri())
+			.body(body);
 	}
 
 	@PutMapping("/employees/{id}")
@@ -64,13 +69,14 @@ public class EmployeeController
 	}
 
 	@DeleteMapping("/employees/{id}")
-	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void deleteEmployee(@PathVariable final long id)
+//	@ResponseStatus(HttpStatus.NO_CONTENT)
+	public ResponseEntity<?> deleteEmployee(@PathVariable final long id)
 	{
 		final EmployeeEntity entity = findEmployee(id);
-
 		_employeeRepository.delete(entity);
 		//		_employeeRepository.deleteById(id);
+
+		return ResponseEntity.noContent().build();
 	}
 
 	private EmployeeEntity findEmployee(final long id)

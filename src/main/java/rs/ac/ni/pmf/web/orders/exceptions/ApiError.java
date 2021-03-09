@@ -12,6 +12,9 @@ public class ApiError
 
 	public enum ErrorCode
 	{
-		EMPLOYEE_NOT_FOUND
+		EMPLOYEE_NOT_FOUND,
+		ORDER_NOT_FOUND,
+		ORDER_NOT_COMPLETABLE,
+		ORDER_NOT_CANCELABLE
 	}
 }

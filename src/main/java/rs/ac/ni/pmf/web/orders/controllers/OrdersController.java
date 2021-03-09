@@ -26,7 +26,7 @@ public class OrdersController
 	@GetMapping("/orders/{id}")
 	public EntityModel<OrderDTO> getOrder(@PathVariable final Long id)
 	{
-		final OrderEntity orderEntity = findeOrder(id);
+		final OrderEntity orderEntity = findOrder(id);
 
 		return EntityModelBuilder.buildOrderEntityModel(OrderMapper.toDto(orderEntity));
 	}
@@ -60,7 +60,7 @@ public class OrdersController
 	@PutMapping("/orders/{id}/complete")
 	public ResponseEntity<?> complete(@PathVariable final Long id)
 	{
-		final OrderEntity orderEntity = findeOrder(id);
+		final OrderEntity orderEntity = findOrder(id);
 
 		if (orderEntity.getStatus() == OrderStatus.IN_PROGRESS)
 		{
@@ -81,7 +81,7 @@ public class OrdersController
 	@PutMapping("/orders/{id}/cancel")
 	public ResponseEntity<?> cancel(@PathVariable final Long id)
 	{
-		final OrderEntity orderEntity = findeOrder(id);
+		final OrderEntity orderEntity = findOrder(id);
 
 		if (orderEntity.getStatus() == OrderStatus.IN_PROGRESS)
 		{
@@ -100,7 +100,7 @@ public class OrdersController
 			);
 	}
 
-	private OrderEntity findeOrder(Long id)
+	private OrderEntity findOrder(Long id)
 	{
 		return _orderRepository.findById(id)
 			.orElseThrow(() -> new OrderNotFoundException(id));

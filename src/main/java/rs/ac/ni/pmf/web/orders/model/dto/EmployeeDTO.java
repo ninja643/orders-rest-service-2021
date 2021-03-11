@@ -12,4 +12,7 @@ public class EmployeeDTO
 	Long id;
 	String name;
 	String role;
+
+	String firstName;
+	String lastName;
 }

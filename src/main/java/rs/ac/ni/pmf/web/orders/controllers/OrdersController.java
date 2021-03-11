@@ -2,7 +2,7 @@ package rs.ac.ni.pmf.web.orders.controllers;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.springframework.hateoas.*;
 import org.springframework.hateoas.mediatype.problem.Problem;
@@ -19,6 +19,7 @@ import rs.ac.ni.pmf.web.orders.repositories.OrderRepository;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/v1")
 public class OrdersController
 {
 	private final OrderRepository _orderRepository;
@@ -90,10 +91,14 @@ public class OrdersController
 			return ResponseEntity.ok(EntityModelBuilder.buildOrderEntityModel(OrderMapper.toDto(completedOrder)));
 		}
 
+		final Map<String, Object> parameters = new HashMap<>();
+		parameters.put("ERROR_CODE", ApiError.ErrorCode.ORDER_NOT_CANCELABLE);
+
 		return ResponseEntity
 			.status(HttpStatus.METHOD_NOT_ALLOWED)
 			.header(HttpHeaders.CONTENT_TYPE, MediaTypes.HTTP_PROBLEM_DETAILS_JSON_VALUE)
 			.body(Problem.create()
+				.withProperties(parameters)
 				.withTitle("Order not cancelable")
 				.withDetail("Cannot cancel the order with id '" + id + "' since it is in status '" + orderEntity.getStatus() +
 					"'")

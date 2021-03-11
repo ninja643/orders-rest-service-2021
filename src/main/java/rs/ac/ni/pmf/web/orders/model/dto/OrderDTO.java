@@ -15,4 +15,6 @@ public class OrderDTO
 	String description;
 
 	OrderStatus status;
+
+	Integer quantity;
 }

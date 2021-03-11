@@ -31,6 +31,12 @@
 			<artifactId>spring-boot-starter-hateoas</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-ui</artifactId>
+			<version>1.5.4</version>
+		</dependency>
+
 		<!-- Database drivers -->
 		<dependency>
 			<groupId>com.h2database</groupId>

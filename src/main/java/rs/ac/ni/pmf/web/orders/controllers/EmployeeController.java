@@ -1,87 +1,38 @@
 package rs.ac.ni.pmf.web.orders.controllers;
 
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.springframework.hateoas.*;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import lombok.RequiredArgsConstructor;
-import rs.ac.ni.pmf.web.orders.exceptions.EmployeeNotFoundException;
+import io.swagger.v3.oas.annotations.*;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import rs.ac.ni.pmf.web.orders.model.dto.EmployeeDTO;
-import rs.ac.ni.pmf.web.orders.model.entity.EmployeeEntity;
-import rs.ac.ni.pmf.web.orders.model.mappers.EmployeeMapper;
-import rs.ac.ni.pmf.web.orders.repositories.EmployeeRepository;
 
-@RestController
-@RequiredArgsConstructor
-public class EmployeeController
+@RequestMapping("/v1")
+public interface EmployeeController
 {
-	private final EmployeeRepository _employeeRepository;
-
 	@GetMapping("/employees")
-	public CollectionModel<EntityModel<EmployeeDTO>> getEmployees()
-	{
-		final List<EntityModel<EmployeeDTO>> models = _employeeRepository.findAll().stream()
-			.map(EmployeeMapper::toDto)
-			.map(EntityModelBuilder::buildEmployeeEntityModel)
-			.collect(Collectors.toList());
+	@Operation(summary = "Retrieve the list of all employees")
+	CollectionModel<EntityModel<EmployeeDTO>> getEmployees();
 
-		return CollectionModel.of(
-			models,
-			linkTo(methodOn(EmployeeController.class).getEmployees()).withSelfRel()
-		);
-	}
-
-	//	@RequestMapping(path = "/employees/{id}", method = RequestMethod.GET)
 	@GetMapping("/employees/{id}")
-	public EntityModel<EmployeeDTO> getEmployee(@PathVariable final long id)
-	{
-		final EmployeeDTO dto = EmployeeMapper.toDto(findEmployee(id));
-		return EntityModelBuilder.buildEmployeeEntityModel(dto);
-	}
+	@Operation(summary = "Retrieve employee details")
+	@ApiResponses(value = {
+		@ApiResponse(responseCode = "200", description = "Found the employee"),
+		@ApiResponse(responseCode = "404", description = "Employee not found")
+	})
+	EntityModel<EmployeeDTO> getEmployee(@Parameter(description = "ID of an employee") @PathVariable long id);
 
 	@PostMapping("/employees")
-//	@ResponseStatus(code = HttpStatus.CREATED)
-//	public EntityModel<EmployeeDTO> addEmployee(@RequestBody final EmployeeDTO employee)
-	public ResponseEntity<?> addEmployee(@RequestBody final EmployeeDTO employee)
-	{
-		final EmployeeEntity entity = EmployeeMapper.toEntity(employee);
-		final EmployeeEntity savedEntity = _employeeRepository.save(entity);
-		final EntityModel<EmployeeDTO> body = EntityModelBuilder.buildEmployeeEntityModel(EmployeeMapper.toDto(savedEntity));
-
-		return ResponseEntity
-			.created(body.getRequiredLink(IanaLinkRelations.SELF).toUri())
-			.body(body);
-	}
+	ResponseEntity<?> addEmployee(@RequestBody EmployeeDTO employee);
 
 	@PutMapping("/employees/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public void updateEmployee(@PathVariable final long id, @RequestBody final EmployeeDTO employee)
-	{
-		final EmployeeEntity entity = findEmployee(id);
-
-		entity.setName(employee.getName());
-		entity.setRole(employee.getRole());
-		_employeeRepository.save(entity);
-	}
+	void updateEmployee(@PathVariable long id, @RequestBody EmployeeDTO employee);
 
 	@DeleteMapping("/employees/{id}")
-//	@ResponseStatus(HttpStatus.NO_CONTENT)
-	public ResponseEntity<?> deleteEmployee(@PathVariable final long id)
-	{
-		final EmployeeEntity entity = findEmployee(id);
-		_employeeRepository.delete(entity);
-		//		_employeeRepository.deleteById(id);
-
-		return ResponseEntity.noContent().build();
-	}
-
-	private EmployeeEntity findEmployee(final long id)
-	{
-		return _employeeRepository.findById(id)
-			.orElseThrow(() -> new EmployeeNotFoundException(id));
-	}
+	ResponseEntity<?> deleteEmployee(@PathVariable long id);
 }
